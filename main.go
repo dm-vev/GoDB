@@ -23,7 +23,7 @@ func main() {
 	doc := NewDocument("user1", `{"name": "John Doe", "age": 30}`)
 
 	// Добавляем документ в коллекцию "users"
-	err = col.InsertDocument(doc)
+	err = col.InsertDocumentAsync(doc)
 	if err != nil {
 		fmt.Println("Error inserting document:", err)
 		return
