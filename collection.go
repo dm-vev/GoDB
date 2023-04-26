@@ -61,7 +61,7 @@ func (col *Collection) InsertDocumentAsync(doc *Document) error {
 	return nil
 }
 
-func (col *Collection) SearchByValueAsync(value string) []string {
+func (col *Collection) SearchByValue(value string) []string {
 	resultChan := make(chan []string)
 
 	go func() {
