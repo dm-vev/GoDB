@@ -33,6 +33,15 @@ func main() {
 
 	http.HandleFunc("/collections/", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
+		case http.MethodDelete:
+			// Delete a collection
+			collectionName := r.URL.Path[len("/collections/"):]
+			if _, ok := db[collectionName]; !ok {
+				http.Error(w, "collection not found", http.StatusNotFound)
+				return
+			}
+			delete(db, collectionName)
+			w.WriteHeader(http.StatusOK)
 		case http.MethodPost:
 			// Insert a new document into a collection
 			collectionName := r.URL.Path[len("/collections/"):]
