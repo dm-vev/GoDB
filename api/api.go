@@ -33,6 +33,8 @@ func (a *API) routes() {
 	a.Router.HandleFunc("/get", a.get).Methods("GET")
 	a.Router.HandleFunc("/delete", a.delete).Methods("POST")
 	a.Router.HandleFunc("/exportToFile", a.exportToFile).Methods("POST")
+	a.Router.HandleFunc("/listTables", a.listTablesHandler).Methods("GET")
+	a.Router.HandleFunc("/listKeys", a.listKeysHandler).Methods("GET")
 }
 
 type createTableRequest struct {
@@ -151,4 +153,46 @@ func (a *API) exportToFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func (a *API) listTablesHandler(w http.ResponseWriter, r *http.Request) {
+	tables, err := a.Store.ListTables()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	response := struct {
+		Tables []string `json:"tables"`
+	}{
+		Tables: tables,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
+}
+
+func (a *API) listKeysHandler(w http.ResponseWriter, r *http.Request) {
+	tableName := r.URL.Query().Get("table_name")
+	if tableName == "" {
+		http.Error(w, "Invalid request: table_name is required", http.StatusBadRequest)
+		return
+	}
+
+	keys, err := a.Store.ListKeys(tableName)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	response := struct {
+		Keys []string `json:"keys"`
+	}{
+		Keys: keys,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response) // TODO: неккоректная работа при большом количестве ключей
 }
