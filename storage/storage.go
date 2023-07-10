@@ -134,3 +134,32 @@ func (s *Storage) loadFromFile(filename string) error {
 
 	return json.Unmarshal(data, &s.data)
 }
+
+func (s *Storage) ListTables() ([]string, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	tables := make([]string, 0, len(s.data))
+	for name := range s.data {
+		tables = append(tables, name)
+	}
+
+	return tables, nil
+}
+
+func (s *Storage) ListKeys(tableName string) ([]string, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	table, ok := s.data[tableName]
+	if !ok {
+		return nil, errors.New("table not found")
+	}
+
+	keys := make([]string, 0, len(table))
+	for key := range table {
+		keys = append(keys, key)
+	}
+
+	return keys, nil
+}
